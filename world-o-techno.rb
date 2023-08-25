@@ -9,13 +9,82 @@
 
 # GPS ruby code derived from https://github.com/ndarilek/rb-gps
 #
+# require '/home/rixx/tmp/world-o-techno/gps/gps.rb'
+# use_debug false
+# gps = Gps::Receiver.create('gpsd',:host => 'localhost', :port => 2947)
+# gps.start
+#
+# create a dummy gps object so we can test without a real one
 
-require '/home/pi/world-o-techno/gps/gps.rb'
-use_debug false
+class Gps
+  attr_accessor :speed, :satellites, :latitude, :initialTime
+  
+  def initialize(waypoints)
+    @speed = 0.0001
+    @satellites = 10
+    @initialTime = Time.now
+    @waypoints = waypoints
+    @waypointIndex = 0
+  end
+  
+  def latitude
+    @startLat = @waypoints[@waypointIndex][0]
+    @endLat = @waypoints[@waypointIndex+1][0]
+    stepsTaken = ((Time.now - @initialTime) / 10 ).floor
+    @resultLat = @startLat + @speed * stepsTaken
+    if (@resultLat > @endLat && @startLat < @endLat) || (@resultLat < @endLat && @startLat > @endLat)
+      @waypointIndex = @waypointIndex + 1
+      if @waypointIndex >= @waypoints.length - 2
+        @waypointIndex = 0
+      end
+      @initialTime = Time.now
+      @resultLat = @waypoints[@waypointIndex][0]
+    end
+    return @resultLat
+  end
+  
+  def longitude
+    @startLon = @waypoints[@waypointIndex][1]
+    @endLon = @waypoints[@waypointIndex+1][1]
+    stepsTaken = ((Time.now - @initialTime) / 10 ).floor
+    @resultLon = @startLon + @speed * stepsTaken
+    if (@resultLon > @endLon && @startLon < @endLon) || (@resultLon < @endLon && @startLon > @endLon)
+      @waypointIndex = @waypointIndex + 1
+      if @waypointIndex >= @waypoints.length - 2
+        @waypointIndex = 0
+      end
+      @initialTime = Time.now
+      @resultLon = @waypoints[@waypointIndex][1]
+    end
+    return @resultLon
+  end
+end
 
-gps = Gps::Receiver.create('gpsd',:host => 'localhost', :port => 2947)
-
-gps.start
+# Creating a dummy GPS object
+# Waypoints are a list of [latitude, longitude] pairs
+gps = Gps.new([
+  [52.74191816730249, 13.265399149840814],
+  [52.74356798827934, 13.265472146591177],
+  [52.74625479381054, 13.26658500928364],
+  [52.75009296027136, 13.266104765493756],
+  [52.75329201138355, 13.26765826934745],
+  [52.755408490557045, 13.273973785683784],
+  [52.75961525949967, 13.276184460453065],
+  [52.762513922863654, 13.283512232988036],
+  [52.76369578712819, 13.280843767447184],
+  [52.765618824341345, 13.279871952400336],
+  [52.76571417675229, 13.27865716966341],
+  [52.76397788732898, 13.277429271970737],
+  [52.7638785372307, 13.275643218720788],
+  [52.756825377243466, 13.268879918757259],
+  [52.756662448834916, 13.265169914598479],
+  [52.753777261648615, 13.2607442146929],
+  [52.753256640456854, 13.25839349903253],
+  [52.75101508892071, 13.257178696736702],
+  [52.749804092991525, 13.256113075289196],
+  [52.74474409313016, 13.25558259384959],
+  [52.742111683183026, 13.260726619405512],
+])
 
 # in pitch order to give a systematic variation as you move
 chords = [:a1, :c1, :e1, :a2, :c2, :e2, :a3, :c3, :e3, :a4, :c4, :e4 ]
@@ -33,8 +102,6 @@ define :gpsSatelliteCount do
   if gps != nil && gps.satellites != nil &&  gps.satellites != 0
     s = gps.satellites.count
   end
-  puts "Satellites:"
-  puts s
   return s;
 end
 
@@ -170,7 +237,6 @@ define :playTune do
     loopChord = chooseChord( lonInt() % 656753 )
     4.times do
       gspeed = speed().modulo(1)
-      #puts gspeed
       play chord(loopChord, :minor).choose, attack: 0, release: locationRelease(0.05), cutoff: rrand_i(70, 98) + i, res: gspeed
       sleep 0.125
     end
