@@ -11,7 +11,7 @@
 waypoints = [
   [53.0322, 13.3104],  # CCCamp23
   [52.0392, -2.378],  # EMF
-])
+]
 
 class Gps
   attr_accessor :speed, :satellites, :latitude, :initialTime
