@@ -2,19 +2,16 @@
 # world-o-techno
 # Acid sample coded by Sam Aaron
 # Hacked around by RS & JHR
-# This file should be in /home/pi/world-o-techno so the startup script can find it
+# Modified by rixx to run on a list of waypoints instead of a real GPS
+# Enter your coordinates in the waypoints array below
 
 # See http://www.jarkman.co.uk/catalog/robots/worldotechno.htm and
 # https://github.com/jarkman/world-o-techno for background
 
-# GPS ruby code derived from https://github.com/ndarilek/rb-gps
-#
-# require '/home/rixx/tmp/world-o-techno/gps/gps.rb'
-# use_debug false
-# gps = Gps::Receiver.create('gpsd',:host => 'localhost', :port => 2947)
-# gps.start
-#
-# create a dummy gps object so we can test without a real one
+waypoints = [
+  [53.0322, 13.3104],  # CCCamp23
+  [52.0392, -2.378],  # EMF
+])
 
 class Gps
   attr_accessor :speed, :satellites, :latitude, :initialTime
@@ -62,29 +59,7 @@ end
 
 # Creating a dummy GPS object
 # Waypoints are a list of [latitude, longitude] pairs
-gps = Gps.new([
-  [52.74191816730249, 13.265399149840814],
-  [52.74356798827934, 13.265472146591177],
-  [52.74625479381054, 13.26658500928364],
-  [52.75009296027136, 13.266104765493756],
-  [52.75329201138355, 13.26765826934745],
-  [52.755408490557045, 13.273973785683784],
-  [52.75961525949967, 13.276184460453065],
-  [52.762513922863654, 13.283512232988036],
-  [52.76369578712819, 13.280843767447184],
-  [52.765618824341345, 13.279871952400336],
-  [52.76571417675229, 13.27865716966341],
-  [52.76397788732898, 13.277429271970737],
-  [52.7638785372307, 13.275643218720788],
-  [52.756825377243466, 13.268879918757259],
-  [52.756662448834916, 13.265169914598479],
-  [52.753777261648615, 13.2607442146929],
-  [52.753256640456854, 13.25839349903253],
-  [52.75101508892071, 13.257178696736702],
-  [52.749804092991525, 13.256113075289196],
-  [52.74474409313016, 13.25558259384959],
-  [52.742111683183026, 13.260726619405512],
-])
+gps = Gps.new(waypoints)
 
 # in pitch order to give a systematic variation as you move
 chords = [:a1, :c1, :e1, :a2, :c2, :e2, :a3, :c3, :e3, :a4, :c4, :e4 ]
